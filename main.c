@@ -185,6 +185,30 @@ void colocaBarco(int x, int y, int orientacion, int largo, int ancho, char simbo
     }
 }
 
+int atacar(int tiradas) {
+    int x, y, intentos = tiradas;
+    scanf("%d %d", &x, &y);
+    //Comprobamos que pasa con las coordenadas
+    if (x < 0 || x >= MAX_TABLERO || y < 0 || y >= MAX_TABLERO) {//Si esta fuera del tablero
+        printf("Coordenadas fuera del tablero\n");
+    }
+    if (tablero[x][y] == 'X') { //Si ya habia una X es que ya habias disparado
+        printf("Ya disparaste en estas coordenadas\n");
+    } else if (tablero[x][y] == ' ') {  //Si esta vacio es que es oceano y has fallado
+        printf("Oceano\n");
+        tablero[x][y] = 'X';
+    } else {
+        printf("Barco %c\n", tablero[x][y]);    //Si no es ninguna de las anteriores es que hay un barco
+        char barco = tablero[x][y]; //Cogemos la letra del barco
+        tablero[x][y] = 'X';    //Marcamos la casilla como disparada
+        if (primeraVez(barco)) {    //Comprobamos si es la primera vezx que hiteamos el barco
+            intentos--; //Si es así la tirada nos sale gratis
+        }
+        isBarcoHundido(x, y, barco);    //Y despues comprobamos si el barco ha sido hundido por completo
+    }
+    intentos++;
+    return intentos;
+}
 
 int main() {
     // Inicializamos el generador de números aleatorios
@@ -218,38 +242,17 @@ int main() {
         mostrarTablero();
         printf("Te quedan %i intentos\n", MAX_INTENTOS - intentos);
         printf("Introduce coordenadas: ");
-        int x, y;
-        scanf("%d %d", &x, &y);
-        //Comprobamos que pasa con las coordenadas
-        if (x < 0 || x >= MAX_TABLERO || y < 0 || y >= MAX_TABLERO) {//Si esta fuera del tablero
-            printf("Coordenadas fuera del tablero\n");
-            continue;
-        }
-        if (tablero[x][y] == 'X') { //Si ya habia una X es que ya habias disparado
-            printf("Ya disparaste en estas coordenadas\n");
-        } else if (tablero[x][y] == ' ') {  //Si esta vacio es que es oceano y has fallado
-            printf("Oceano\n");
-            tablero[x][y] = 'X';
-        } else {
-            printf("Barco %c\n", tablero[x][y]);    //Si no es ninguna de las anteriores es que hay un barco
-            char barco = tablero[x][y]; //Cogemos la letra del barco
-            tablero[x][y] = 'X';    //Marcamos la casilla como disparada
-            if (primeraVez(barco)) {    //Comprobamos si es la primera vezx que hiteamos el barco
-                intentos--; //Si es así la tirada nos sale gratis
-            }
-            isBarcoHundido(x, y, barco);    //Y despues comprobamos si el barco ha sido hundido por completo
-        }
+
+        intentos = atacar(intentos);
 
         if (hasGanado()) {  //Despues de cada tirada comprobamos si hemos ganado, es decir, no queda ningun barco
             printf("Has ganado\n");
             break;
         }
-        intentos++;
+
     }
     //Fin del bucle y fin del juego
 
     printf("Fin del juego\n");
     return 0;
 }
-
-
